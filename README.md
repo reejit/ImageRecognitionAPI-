@@ -10,4 +10,19 @@ Image Recognition API using tensorflow &amp; deeplearning.
 
 ## Test on Postman
 
+Body -> raw -> JSON
+```
+{
+    "username": "Hamza",
+    "password":"xyz",
+    "admin_pw":"abc123",
+    "refill":6,
+    "url": "https://upload.wikimedia.org/wikipedia/commons/e/e3/Plains_Zebra_Equus_quagga.jpg"
+}
+```
+
 ## Docker
+```
+docker-compose build 
+docker-compose up
+```

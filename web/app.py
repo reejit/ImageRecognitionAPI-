@@ -8,10 +8,9 @@ Image Recognition API using Deep learning
 
 @author Hamza Arain
 @version 0.0.1v
-@date 28 October 2020
+@date 29 October 2020
 
 """
-
 
 # Import modules
 ## Api related modules
@@ -60,10 +59,22 @@ class Tool():
             return False
 
     def UserExist(username):
+        """Check the existance of user"""
         if users.find({"Username":username}).count() == 0:
             return False
         else:
             return True
+
+    def verifyCredentials(username, password):
+        if not Tool.UserExist(username):
+            return self.JSONOutputMessage(statusCode=301, output="Invalid Username"), True
+
+        correct_pw = Tool.verifyPw(username, password)
+
+        if not correct_pw:
+            return self.JSONOutputMessage(statusCode=302, output="Incorrect password"), True
+
+        return None, False
 
 
 
@@ -72,6 +83,7 @@ class Tool():
 # ###########################################################    
 
 class Register(Resource):
+    """Register user"""
     def post(self):
         #Step 1 is to get posted data by the user
         postedData = request.get_json()
@@ -95,28 +107,8 @@ class Register(Resource):
         return Tool.JSONOutputMessage(statusCode=200, output="You successfully signed up for the API")
 
 
-
-
-def generateReturnDictionary(status, msg):
-    retJson = {
-        "status": status,
-        "msg": msg
-    }
-    return retJson
-
-def verifyCredentials(username, password):
-    if not Tool.UserExist(username):
-        return generateReturnDictionary(301, "Invalid Username"), True
-
-    correct_pw = Tool.verifyPw(username, password)
-
-    if not correct_pw:
-        return generateReturnDictionary(302, "Incorrect Password"), True
-
-    return None, False
-
-
 class Classify(Resource):
+    """Image classifier"""
     def post(self):
         postedData = request.get_json()
 
@@ -124,7 +116,7 @@ class Classify(Resource):
         password = postedData["password"]
         url = postedData["url"]
 
-        retJson, error = verifyCredentials(username, password)
+        retJson, error = Tool.verifyCredentials(username, password)
         if error:
             return jsonify(retJson)
 
@@ -133,44 +125,43 @@ class Classify(Resource):
         })[0]["Tokens"]
 
         if tokens<=0:
-            return jsonify(generateReturnDictionary(303, "Not Enough Tokens"))
+            Tool.JSONOutputMessage(statusCode=303, output="Not enough tokens")
 
         r = requests.get(url)
         retJson = {}
         with open('temp.jpg', 'wb') as f:
             f.write(r.content)
-            proc = subprocess.Popen('python classify_image.py --model_dir=. --image_file=./temp.jpg', stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True)
-            ret = proc.communicate()[0]
+            proc = subprocess.Popen('python3 classify_image.py --model_dir=. --image_file=temp.jpg', stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True)
+            proc.communicate()[0]
             proc.wait()
-            with open("text.txt") as f:
-                retJson = json.load(f)
-
+            with open("text.txt") as g:
+                retJson = json.load(g)
 
         users.update({
             "Username": username
         },{
             "$set":{
                 "Tokens": tokens-1
-            }
+            }  
         })
-
         return retJson
 
 
 class Refill(Resource):
+    """Refill no. tokens by admin"""
     def post(self):
         postedData = request.get_json()
 
         username = postedData["username"]
         password = postedData["admin_pw"]
-        amount = postedData["amount"]
+        amount = postedData["refill"]
 
         if not Tool.UserExist(username):
-            return jsonify(generateReturnDictionary(301, "Invalid Username"))
+            return Tool.JSONOutputMessage(statusCode=301, output="Invalid Username")
 
         correct_pw = "abc123"
         if not password == correct_pw:
-            return jsonify(generateReturnDictionary(302, "Incorrect Password"))
+            return Tool.JSONOutputMessage(statusCode=302, output="Incorrect Password")
 
         users.update({
             "Username": username
@@ -179,7 +170,8 @@ class Refill(Resource):
                 "Tokens": amount
             }
         })
-        return jsonify(generateReturnDictionary(200, "Refilled"))
+        
+        return Tool.JSONOutputMessage(statusCode=200, output="Refilled")
 
 
 # ###########################################################
