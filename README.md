@@ -1,2 +1,4 @@
-# ImageRecognitionAPI-
-Image Recognition API using tensorflow &amp; deeplearning
+# Image Recognition API
+Image Recognition API using tensorflow &amp; deeplearning.
+
+
