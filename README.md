@@ -20,6 +20,8 @@ Body -> raw -> JSON
     "url": "https://upload.wikimedia.org/wikipedia/commons/e/e3/Plains_Zebra_Equus_quagga.jpg"
 }
 ```
+![]( imageAPI.png )
+
 
 ## Docker
 ```
