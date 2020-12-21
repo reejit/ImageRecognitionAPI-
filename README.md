@@ -10,6 +10,8 @@ Image Recognition API using tensorflow &amp; deeplearning.
 
 ## Test on Postman
 
+heroku.com/deploy
+
 Body -> raw -> JSON
 ```
 {
